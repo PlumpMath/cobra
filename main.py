@@ -7,6 +7,7 @@ from panda3d.core                   import Point2
 
 from direct.showbase.ShowBase       import ShowBase
 from direct.task.Task               import Task
+from direct.gui.DirectGui           import DirectFrame
 
 from settings                       import *
 from helpers                        import genLabelText, loadObject
@@ -17,21 +18,18 @@ class World( ShowBase ):
         ShowBase.__init__( self )
 
         self.disableMouse( )
-        self.snake          = snake.Snake( body=[ (-7, 1), (-8, 1), (-9, 1) ], dot=(-7, 1) )
-        self.snake.gen_dot( )
 
         self.background     = loadObject( "background", scale=9000, depth=200, transparency=False )
         self.gameboard      = loadObject( "background", scale=39.5, depth=100, transparency=False )
         self.escape_text    = genLabelText( "ESC  : Quit", 0 )
         self.pause_text     = genLabelText( "SPACE: Pause", 1)
+        self.reset()
         self.score          = genLabelText( "SCORE: %s" % self.snake.get_score( ), 0, left=False )
+        self.some_frame     = DirectFrame( frameColor=(0, 1, 0, 1), frameSize=(1,1,1,1), pos=(0,0,0) )
+        self.some_frame.reparentTo( self.render2d )
         
-        self.bricks         = deque( )
-        self.make_dot( )
-
-        self.draw_snake( )
         self.accept( "escape",      sys.exit )
-        self.accept( "enter",       self.restart )
+        self.accept( "enter",       self.reset )
         self.accept( "arrow_up",    self.snake.turn, [ POS_Y ] )
         self.accept( "arrow_down",  self.snake.turn, [ NEG_Y ] )
         self.accept( "arrow_left",  self.snake.turn, [ NEG_X ] )
@@ -43,10 +41,14 @@ class World( ShowBase ):
         self.period         = 0.15
         self.pause          = False
 
+
     def game_loop( self, task ):
         dt = task.time - task.last
         if not self.snake.alive: 
-            return task.done
+            for brick in self.bricks:
+                brick.removeNode()
+            self.dot.removeNode()
+            return task.cont
         if self.pause:
             return task.cont
         elif dt >= self.period:
@@ -65,6 +67,25 @@ class World( ShowBase ):
         for point in self.snake.body:
             brick = loadObject( "brick", pos=Point2( point[ X ], point[ Y ] ) )
             self.bricks.append( brick )
+
+    def reset( self ):
+        self.snake          = snake.Snake( body=[ (-7, 1), (-8, 1), (-9, 1) ], dot=(-7, 1) )
+        self.snake.gen_dot( )
+        self.bricks         = deque( )
+        self.make_dot( )
+        self.draw_snake( )
+
+
+    # def remove_snake( self ):
+    #     for brick in self.bricks:
+    #         brick.removeNode()
+        
+    #     if self.dot:
+    #         self.dot.removeNode()
+
+    # def restart( self ):
+    #     self.remove_snake()
+    #     self.reset()
 
     def update_snake( self ):
         try:
@@ -86,9 +107,7 @@ class World( ShowBase ):
             self.dot.setPos( self.snake.dot[ X ], SPRITE_POS, self.snake.dot[ Y ] )
 
     def update_score( self ):
-        if self.score:
-            self.score.removeNode( )
-        self.score = genLabelText( "Score: %s" % self.snake.get_score( ), 0, left=False )
+        self.score.setText( "Score: %s" % self.snake.get_score( ) )
 
     def tooggle_pause( self ):
         if self.pause:  self.pause = False
