@@ -25,8 +25,9 @@ class World( ShowBase ):
         self.pause_text     = genLabelText( "SPACE: Pause", 1)
         self.reset()
         self.score          = genLabelText( "SCORE: %s" % self.snake.get_score( ), 0, left=False )
-        self.some_frame     = DirectFrame( frameColor=(0, 1, 0, 1), frameSize=(1,1,1,1), pos=(0,0,0) )
+        self.some_frame     = DirectFrame( frameColor=(0, 1, 0, 1), frameSize=(-1, 1, -1, 1), pos=(0,0,0) )
         self.some_frame.reparentTo( self.render2d )
+        self.some_frame.hide()
         
         self.accept( "escape",      sys.exit )
         self.accept( "enter",       self.reset )

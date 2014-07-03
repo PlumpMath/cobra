@@ -12,7 +12,7 @@ def genLabelText( text, i, left=True ):
     label["fg"]     = ( 0.148, 0.176, 0.105, 1 )
     label["align"]  = TextNode.ALeft
     label["scale"]  = 0.06
-    label["font"]   = loader.loadFont('data/fonts/FreeMonoBold.ttf')
+    label["font"]   = loader.loadFont('data/fonts/DejaVuSansMono.ttf')
     if left:    label["pos"] = ( -1.3, .95-.06*i )
     else:       label["pos"] = ( 0.95, .95-.06*i )
     return label
