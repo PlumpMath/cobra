@@ -4,27 +4,37 @@ from settings       import *
 from collections    import deque
 from random         import randrange
 
+from panda3d.core     import Point2
+
 class Snake( object ):
-    def __init__( self, body=[(0, 0), (1, 0), (2, 0)], vector=POS_X, dot=(0, 0) ):
+    def __init__( self, body=[ (0, 0), (1, 0), (2, 0)], vector=NEG_X ):
         object.__init__( self )
-        self.body           = deque( body )
+        self.body           = deque()
+
+        for segment in body:
+            point = Point2( segment[0], segment[1] )
+            self.body.appendleft( point )
         self.vector         = vector
-        self.dot            = dot
+        self.dot            = self.GenDot()
         self.alive          = True
         self.init_len       = len( self.body )
-
-    def check_state( self ):
         head = self.body[0]
-        if self.body.count( head ) > 1: self.alive = False 
-        elif head[X] < -MAX_X or head[X] > MAX_X: self.alive = False 
-        elif head[Y] < -MAX_Y or head[Y] > MAX_Y: self.alive = False 
 
-    def move_forward( self ):
+    def CheckState( self ):
         head = self.body[0]
-        next = ( head[X] + self.vector[X], head[Y] + self.vector[Y] )
+        if self.body.count( head ) > 1: 
+            self.alive = False 
+        elif head.getX() < -MAX_X or head.getX() > MAX_X: 
+            self.alive = False 
+        elif head.getY < -MAX_Y or head.getY() > MAX_Y: 
+            self.alive = False 
+
+    def MoveForward( self ):
+        head = self.body[0]
+        next = Point2( head.getX() + self.vector[X], head.getY() + self.vector[Y] )
         self.body.appendleft( next )
         if head == self.dot:
-            self.gen_dot( )
+            self.dot = self.GenDot()
         if next != self.dot:
             self.body.pop( )
 
@@ -33,9 +43,11 @@ class Snake( object ):
         if scal_prod == 0:
             self.vector = direction
 
-    def gen_dot( self ):
-        while self.dot in self.body:
-            self.dot    = ( randrange( - MAX_X, MAX_X ), randrange( -MAX_Y, MAX_Y ) )
+    def GenDot( self ):
+        while True:
+            dot    = Point2( randrange( - MAX_X, MAX_X ), randrange( -MAX_Y, MAX_Y ) )
+            if dot not in self.body:
+                return dot
 
     def get_score( self ):
         return len( self.body ) - self.init_len
