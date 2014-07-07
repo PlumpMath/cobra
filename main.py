@@ -17,8 +17,7 @@ class World( ShowBase ):
         ShowBase.__init__( self )
 
         self.disableMouse( )
-        self.snake          = snake.Snake( body=[ (-7, 1), (-8, 1), (-9, 1) ] )
-        # self.snake.gen_dot( )
+        self.snake          = snake.Snake( self.loader, self.camera, start_body=[ (-7, 1), (-8, 1), (-9, 1) ] )
 
         self.background     = LoadObject( "background", scale=9000, depth=200, transparency=False )
         self.gameboard      = LoadObject( "background", scale=39.5, depth=100, transparency=False )
@@ -26,11 +25,12 @@ class World( ShowBase ):
         self.pause_text     = GenLabelText( "SPACE: Pause", 1)
         self.score          = GenLabelText( "SCORE: %s" % self.snake.get_score( ), 0, left=False )
         self.state_text     = GenLabelText( "ALIVE: %s" % self.snake.alive, 2 )
+        self.brick = LoadObject( "brick", pos=Point2( 0, 0 ) )
         
         self.bricks         = deque( )
-        self.make_dot( )
+        # self.make_dot( )
 
-        self.draw_snake( )
+        # self.draw_snake( )
         self.accept( "escape",      sys.exit )
         self.accept( "enter",       self.restart )
         self.accept( "arrow_up",    self.snake.turn, [ POS_Y ] )
@@ -55,8 +55,8 @@ class World( ShowBase ):
             task.last = task.time
             self.snake.MoveForward( )
             self.snake.CheckState( )
-            self.update_snake( )
-            self.update_dot( )
+            # self.update_snake( )
+            # self.update_dot( )
             self.update_score( )
             return task.cont
         else:
@@ -75,8 +75,8 @@ class World( ShowBase ):
                 brick   = self.bricks[ i ]
                 brick.setPos( point[ X ], SPRITE_POS, point[ Y ] )
         except IndexError:
-            new_head    = self.dot
-            self.make_dot( )
+            new_head    = self.snake.dot
+            # self.make_dot( )
             self.bricks.appendleft( new_head )
 
     def make_dot( self ):
@@ -88,9 +88,7 @@ class World( ShowBase ):
             self.dot.setPos( self.snake.dot[ X ], SPRITE_POS, self.snake.dot[ Y ] )
 
     def update_score( self ):
-        if self.score:
-            self.score.removeNode( )
-        self.score = GenLabelText( "Score: %s" % self.snake.get_score( ), 0, left=False )
+        self.score.setText( "Score: %s" % self.snake.get_score() )
 
     def tooggle_pause( self ):
         if self.pause:  self.pause = False

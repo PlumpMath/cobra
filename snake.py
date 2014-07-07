@@ -4,21 +4,42 @@ from settings       import *
 from collections    import deque
 from random         import randrange
 
-from panda3d.core     import Point2
+from helpers                        import GenLabelText, LoadObject
+
+from panda3d.core     import Point2, Point3
 
 class Snake( object ):
-    def __init__( self, body=[ (0, 0), (1, 0), (2, 0)], vector=NEG_X ):
+    def __init__( self, loader, camera, start_body=[(-7, 1), (-8, 1), (-9, 1)], start_vector=POS_X ):
         object.__init__( self )
-        self.body           = deque()
+        self.loader         = loader
+        self.camera         = camera
 
-        for segment in body:
-            point = Point2( segment[0], segment[1] )
-            self.body.appendleft( point )
-        self.vector         = vector
+        self.start_body     = deque()
+        for segment in start_body:
+            point = Point2( segment[X], segment[Y] )
+            self.start_body.append( point )
+        self.body           = deque()
+        self.start_vector   = start_vector
+        self.Reset()
+        # self.alive          = True
+        self.init_len       = len( self.start_body )
+
+    def Reset( self ):
         self.dot            = self.GenDot()
-        self.alive          = True
-        self.init_len       = len( self.body )
-        head = self.body[0]
+        self.alive = True
+        self.vector = self.start_vector
+        for segment in self.start_body:
+            brick = self.loader.loadModel( PLANE )
+            brick.reparentTo( self.camera )
+            brick.show()
+            texture = self.loader.loadTexture( PATH_TO_SPRITES + BRICK_SPRITE )
+            brick.setTexture( texture, 1 )
+            brick.setPos( Point3( segment.getX(), SPRITE_POS, segment.getY() ) )
+            self.body.appendleft( brick )
+        print len(self.body)
+
+
+
 
     def CheckState( self ):
         head = self.body[0]
@@ -45,7 +66,7 @@ class Snake( object ):
 
     def GenDot( self ):
         while True:
-            dot    = Point2( randrange( - MAX_X, MAX_X ), randrange( -MAX_Y, MAX_Y ) )
+            dot    = LoadObject("brick", Point2( randrange( - MAX_X, MAX_X ), randrange( -MAX_Y, MAX_Y ) ))
             if dot not in self.body:
                 return dot
 
